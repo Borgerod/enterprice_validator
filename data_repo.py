@@ -1,6 +1,7 @@
 import pandas as pd 
 import yfinance as yf
 from extractor import Extractor
+from exchange_name_chart import Exchanges as ex
 
 class DataRepo:
 
@@ -54,13 +55,86 @@ class DataRepo:
         
 
 class Enterprice:
-    def __init__(self, name, org_num, ticker, exchange, exchange_ticker,) -> None:
-        self.name = None #Full legal company name 
-        self.org_num = None #organisation number
-        self.ticker = None
-        self.exchange = None
-        self.exchange_ticker = None #e.g. OL for Oslo stock exchange completed ticker will look like e.g. LSG.OL  
+    def __init__(self, ticker, country=None, exchange=None, exchange_ticker=None,) -> None:
+        '''
+        yahoo finance uses EOD_codes to differentiate between exchanges, so stocks need identification for that exchange in order to work. 
+        '''
+        if (ticker, exchange, exchange_ticker,) == None:
+            raise ValueError("You need atleast two parameters for this object to work: 1 (the stock ticker), and 2 (either the name of the exchange, or origin country, or the exchange's ticker symbol) ")
+        self.exchange_ticker = exchange_ticker
+        self.exchange = exchange
+        self.country = country
+        self.ticker = ex().convert_to_propriate_ticker(ticker=ticker, _input=[i for i in [self.exchange_ticker,self.exchange,self.country] if i][0])
+       
+        self.iniate_all_properties()
+    
+    @property
+    def statistics(self,):
+        stat = self.company.info
+        return {
+            'ebitda': float(stat['ebitda']),
+            'beta': float(stat['beta']),
+            'earningsGrowth' : float(stat['earningsGrowth']),
+            'debtToEquity' : float(stat['debtToEquity']),
+            'dividendRate' : float(stat['dividendRate']),
+            'dividendYield' : float(stat['dividendYield']),
+            'ebitdaMargins' : float(stat['ebitdaMargins']),
+            'enterpriseToEbitda' : float(stat['enterpriseToEbitda']),
+            'enterpriseValue' : float(stat['enterpriseValue']),
+            'marketCap' : float(stat['marketCap']),
+            'operatingCashflow' : float(stat['operatingCashflow']),
+            'returnOnAssets' : float(stat['returnOnAssets']),
+            'returnOnEquity' : float(stat['returnOnEquity']),
+            'revenueGrowth' : float(stat['revenueGrowth']),
+            'totalCash' : float(stat['totalCash']),
+            'totalDebt' : float(stat['totalDebt']),
+            'totalRevenue' : float(stat['totalRevenue']),
+            'country' : stat['country'],
+        }
+    @property
+    def balance (self, ):
+        return {
+            'A' : float(self.company.balance_sheet.loc['Total Assets'][0]),
+            'E' : float(self.company.balance_sheet.loc['Total Equity Gross Minority Interest'][0]),
+            'D' : float(self.company.balance_sheet.loc['Total Liabilities Net Minority Interest'][0]),
+        }
+    
+    @property
+    def analysis (self, ):
+        pass
+        '''return {
+            '' : float(self.company._analysis.loc[''][0]),
+            '' : float(self.company._analysis.loc[''][0]),
+            '' : float(self.company._analysis.loc[''][0]),
+        }'''
+
+    def iniate_all_properties(self):
+        self.company = yf.Ticker(self.ticker)
+        self.statistics
+        self.balance
+        self.analysis
         
+    def check_exchange(self, arg, exchange):
+        # DEPRICATED
+        self.exchange = exchange
+        
+        if self.exchange:
+            if isinstance(arg, list):
+                arg = [f"{ticker}.{self.exchange}" for ticker in arg if '.' not in ticker]
+            else:
+                arg = f"{arg}.{self.exchange}"
+        return arg 
+    
+
+    def set_statistics(self):
+        self.statistics['EBIDTA'] = 69
+
+
+
+
+
+
+
 
 
 def temp_main():
@@ -75,6 +149,16 @@ def temp_main():
             - 
     '''
     dr = DataRepo()
+    lsg = yf.Ticker("LSG.OL")
+    #pprint(lsg.info)
+    Lsg = Enterprice('Lerøy Seafood Group ASA', '975350940', 'LSG', 'Oslo', 'OL')
+    #Lsg = Enterprice("LSG.OL")
+    print(Lsg.statistics['EBITDA'])
+
+
+
+    #print(lsg.info['ebitda'])
+    '''
     dr.compeditors = ['AUSS', 'NVMI', 'SALM', 'MOWI', 'GSF', 'OBSFX']
     dr.target = 'LSG'
     target = Enterprice('Lerøy Seafood Group ASA', '975350940', 'LSG', 'Oslo', 'OL')
@@ -92,7 +176,7 @@ def temp_main():
     yahoo = Extractor('yfinance')
     name = yahoo.get_legal_name(ticker, )
     print(name)
-    
+    '''
 
 if __name__ == '__main__':
     temp_main()

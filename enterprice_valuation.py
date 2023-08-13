@@ -5,78 +5,19 @@ from rates import Rates
 
 COMPEDITOR_PORTFOLIO = []
 
-class EnterpriceValue(Rates):
-    def __init__(self, company,): # r, beta): #SHOULD BE REPLACED WITH SUPER 
-        '''company = enterprice to valuate'''
-        self.company = company
-        self.country = company.statistics['country']
-        #self.country = r.country
-        r = Rates(self.country)
-        #self.beta = Beta()
-        #self.beta = beta
-        self.E = self.company.balance['E']
-        self.D = self.company.balance['D']
-        self.Beta = Beta(self.company)
-    
-
-
-    @property
-    def rM(self,):
-        roas = [compeditor.statistics['returnOnAssets'] for compeditor in COMPEDITOR_PORTFOLIO]
-        return sum(roas)/len(roas)
-
-    @property
-    def rE(self,):
-        '''Ke cost of equity'''
-        return self.Rfm + self.Beta.Be * (self.rM - self.Rfm)
-        #return self.Rfm + Beta(self.company).Be * (self.rM - self.Rfm)  #Alternative 
-    
-    @property
-    def rD(self,):
-        '''Kg cost of debt'''
-        ''' Bd = Bg = DebtBeta '''
-        return self.Rfm + self.Beta.Bd * (self.rM - self.Rfm)
-        #return self.Rfm + Beta(self.company).Bd * (self.rM - self.Rfm) #Alternative
-
-    @property
-    def wE(self, ):
-        ''' weight of equity; how much % of the capital is equity'''
-        return  self.E / (self.E+self.D)
-
-
-    @property
-    def wD(self, ):
-        ''' weight of debt; how much % of the capital is debt'''
-        return  self.D / (self.E+self.D)
-
-    @property
-    def wacc(self, ):
-        return ((self.wE)*self.rE) + (self.wD)*(self.rD)*(1-self.tax)
-    
-    @property
-    def Vm(self, ):
-        ''' Value of company '''
-        return
-    
-    @property
-    def Vu(self, ):
-        ''' Value of company '''
-        return
-
-
-    @property
-    def Vx(self, ):
-        ''' Value of company '''
-        return
-
 
 class Beta(Enterprice):
 
     def __init__(self, company):
         self.all_E = False # True if the company is 100% Equity based (no debt)
+        '''
         self.company = company
         self.D = self.company.balance['D']
         self.E = self.company.balance['E']
+        '''
+
+        self.D = self.balance['D']
+        self.E = self.balance['E']
         self.wD = self.D / (self.E+self.D)
         self.wE = self.E / (self.E+self.D)
     
@@ -109,7 +50,8 @@ class Beta(Enterprice):
         '''
         # I ASSUME THAT THIS IS THE RIGHT ONE
         # IF not, then this might also be the Beta for the whole company, Bi I think? regardless, its a combined beta for Bd and Be 
-        return self.company.statistics['beta']
+        #return self.company.statistics['beta']
+        return self.statistics['beta']
 
     @property
     def Bi(self):
@@ -117,6 +59,94 @@ class Beta(Enterprice):
             Bi = (Be * wE) + (Bg * wG)
         '''
         return (self.Be * self.wE) + (self.Bd* self.wD)
+
+   
+class WeightOf:
+    def __init__(self, E, D): # r, beta): #SHOULD BE REPLACED WITH SUPER 
+        self.E = E 
+        self.D = D
+
+    @property
+    #def wE(self, ):
+    def equity(self, ):
+        ''' weight of equity; how much % of the capital is equity'''
+        return  self.E / (self.E+self.D)
+
+
+    @property
+    #def wD(self, ):
+    def debt(self, ):
+        ''' weight of debt; how much % of the capital is debt'''
+        return  self.D / (self.E+self.D)
+
+
+class CapitalCost(Beta, Rates, Enterprice):
+    def __init__(self, company,): # r, beta): #SHOULD BE REPLACED WITH SUPER 
+        '''company = enterprice to valuate'''
+        self.country = self.statistics['country']
+        ''' FORTSATT MULGI JEG MÅ GJØRE DET SÅNN
+        self.company = company
+        self.country = company.statistics['country']
+        '''
+        self.E = self.balance['E']
+        self.D = self.balance['D']
+    
+    @property
+    def rM(self,):
+        roas = [compeditor.statistics['returnOnAssets'] for compeditor in COMPEDITOR_PORTFOLIO]
+        return sum(roas)/len(roas)
+
+    @property
+    def rE(self,):
+        '''Ke cost of equity'''
+        return self.Rfm + self.Be * (self.rM - self.Rfm)
+        #return self.Rfm + Beta(self.company).Be * (self.rM - self.Rfm)  #Alternative 
+    
+    @property
+    def rD(self,):
+        '''Kg cost of debt'''
+        ''' Bd = Bg = DebtBeta '''
+        
+        return self.Rfm + self.Bd * (self.rM - self.Rfm)
+        #return self.Rfm + Beta(self.company).Bd * (self.rM - self.Rfm) #Alternative
+
+    @property
+    def wacc(self, ):
+        w = WeightOf(self.E, self.D) 
+        return ((w.equity)*self.rE) + (w.debt)*(self.rD)*(1-self.tax)
+
+        #return ((self.wE)*self.rE) + (self.wD)*(self.rD)*(1-self.tax)
+ 
+
+#class EnterpriceValue(CapitalCost):
+class EnterpriceValue(CapitalCost, Enterprice):
+    def __init__(self, company,): # r, beta): #SHOULD BE REPLACED WITH SUPER 
+        '''company = enterprice to valuate'''
+        ''' FORTSATT MULGI JEG MÅ GJØRE DET SÅNN
+        self.company = company
+        self.country = company.statistics['country']
+        '''
+        self.country = company.statistics['country']
+        print(self.balance['A'])
+
+
+    @property
+    def Vm(self, ):
+        ''' Value of company '''
+        return 
+    
+    @property
+    def Vu(self, ):
+        ''' Value of company '''
+        return
+
+    @property
+    def Vx(self, ):
+        ''' Value of company '''
+        return
+
+
+
 
 
 
@@ -161,9 +191,9 @@ def main():
     r = Rates(country)
     #beta = Beta(country)
     E = EnterpriceValue(lsg,)# r, beta)
-    print(E.rE)
+    
 
-    print(E.wacc)
+    #print(E.wacc)
     
 if __name__ == '__main__':
     main()

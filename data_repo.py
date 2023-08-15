@@ -52,7 +52,7 @@ class DataRepo:
 
     def get_balance(self):
         pass
-        
+
 
 class Enterprice:
     def __init__(self, ticker, country=None, exchange=None, exchange_ticker=None,) -> None:
@@ -97,6 +97,7 @@ class Enterprice:
             'A' : float(self.company.balance_sheet.loc['Total Assets'][0]),
             'E' : float(self.company.balance_sheet.loc['Total Equity Gross Minority Interest'][0]),
             'D' : float(self.company.balance_sheet.loc['Total Liabilities Net Minority Interest'][0]),
+            'net_debt': float(self.company.balance_sheet.loc['Net Debt'][0]),
         }
     
     @property
@@ -107,6 +108,15 @@ class Enterprice:
             '' : float(self.company._analysis.loc[''][0]),
             '' : float(self.company._analysis.loc[''][0]),
         }'''
+
+    @property
+    def income_statement (self, ):
+        pass
+        return {
+            'interest_expence' : float(self.company.income_stmt.loc['Interest Expense'][0]),
+        }
+
+
 
     def iniate_all_properties(self):
         self.company = yf.Ticker(self.ticker)

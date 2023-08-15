@@ -1,102 +1,109 @@
-import pandas as pd
-import yfinance as yf
-from pprint import pprint 
-import requests
-from bs4 import BeautifulSoup
+class Parent:
+    def __init__(self) -> None:
+        self.info = "I AM PARENT INFO, BEEP-BOOP"
 
-dic = {
-    'mike': ['mike', 20],
-    'john': ['john', 32],
-    'steve': ['steve', 19],
-}
-for key, val in dic.items():
-    globals()[key] = [(val[0], val[1])]
-print(mike)
+    def get_child(self):
+        return Child()
+
+class Child(Parent):
+    def __init__(self) -> None:
+        
+        super().__init__()
+        print(self.info)
 
 
+p = Parent()
 
-    #print(x)
-    #print(y)
-   #globals()[x] = y
+print(p.get_child())
+""" 
 
-#print(mike)
+class Object:
+    ''' 
+        I represent the data object and I am essential 
+    '''
+    def __init__(self, ticker) -> None:
+        self.ticker = ticker 
 
-'''
-name = ['mike', 'john', 'steve']   
-age = [20, 32, 19] 
-
-for x,y in zip(name, age):
-    globals()[x] = y
-
-print(mike)
-'''
-'''
-# get historical market data
-hist = msft.history(period="1mo")
-
-
-# show actions (dividends, splits, capital gains)
-print("actions: ")
-print(msft.actions)
-print()
-
-print("dividends: ")
-print(msft.dividends)
-print()
-
-print("splits: ")
-print(msft.splits)
-print()
+    @property
+    def info(self,):
+        print( f"I AM OBJECT INFO for {self.ticker}, BEEP-BOOP" )
+        if self.ticker =='abc':
+            return 666
+        else:
+            return None
+        
+    @property
+    def statistics(self,):
+        print(f"I AM OBJECT STATISTICS for {self.ticker}, BEEP-BOOP" )
+        if self.ticker =='abc':
+            return 123
+        else:
+            return None
 
 
-# show financials:
-# - income statement
-print("financials: ")
-print(msft.financials)
-print()
+class ParentClass:
+    '''
+        I represent the parent class for processing the Objects data 
+    '''
+    def __init__(self, object_1) -> None:
+    #def __init__(self, ) -> None:
+        pass
+        
+    def GET(self, object_1):
+        return self.object_1
+        
+
+    def process(self,): 
+        '''
+            processing data from Object, will call child classes (calculators / formulas) to get processed data.
+            then finally returns a fully processed data output
+        '''
+        return [Child_A().x], [Child_B().y]
+    
 
 
-# - balance sheet
-print("balance_sheet: ")
-print(msft.balance_sheet)
-print()
+#class Child_A:
+class Child_A(Object, ParentClass):
+    '''
+        I represent a calculator class and are a child of Parent 
+    '''
 
+    def __init__(self) -> None:
+        #passing for now 
+        pass
 
-# - cash flow statement
-print("cashflow: ")
-print(msft.cashflow)
-print()
-
-
-# show holders
-print("major_holders: ")
-print(msft.major_holders, msft.institutional_holders, msft.mutualfund_holders)
-print()
-# Show future and historic earnings dates, returns at most next 4 quarters and last 8 quarters by default. 
-# Note: If more are needed use msft.get_earnings_dates(limit=XX) with increased limit argument.
-print("earnings: ")
-print(msft.earnings)
-print()
-
-# show ISIN code - *experimental*
-# ISIN = International Securities Identification Number
-print("isin: ")
-print(msft.isin)
-print()
-
-
-# show options expirations
-msft.options
-
-# show news
-msft.news
-
-# get option chain for specific expiration
-opt = msft.option_chain('YYYY-MM-DD')
-# data available via: opt.calls, opt.puts
-
-'''
+    @property
+    def x(self,):
+        return self.info, 69
 
 
 
+#class Child_B:
+class Child_B(Object, ParentClass):
+    '''
+        I represent a calculator class and are a child of Parent 
+    '''
 
+    def __init__(self) -> None:
+        #passing for now 
+        pass
+
+    @property
+    def y(self,): 
+        return self.statistics, 420
+
+
+def main():
+    object_1 = Object(ticker='abc')
+
+    p = ParentClass(object_1)    
+    print(
+        p.process()
+    )
+
+
+if __name__ == '__main__':
+    main()
+
+
+"""

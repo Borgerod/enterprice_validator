@@ -91,26 +91,46 @@ class CapitalCost(Beta, Rates, Enterprice):
             self.TARGET = TARGET
             self.country = TARGET.statistics['country']
         '''
-
     
     @property
-    def rM(self,):
+    def ErM(self,):
+        ''' market interest rate'''
         roas = [COMPEDITOR.statistics['returnOnAssets'] for COMPEDITOR in COMPEDITOR_PORTFOLIO]
         return sum(roas)/len(roas)
 
     @property
     def rE(self,):
-        '''Ke cost of equity'''
-        return self.Rfm + self.Be * (self.rM - self.Rfm)
+        '''Ke: cost of equity'''
+        return self.Rfm + (self.Be * (self.ErM - self.Rfm))
         #return self.Rfm + Beta(self.TARGET).Be * (self.rM - self.Rfm)  #Alternative 
     
     @property
     def rD(self,):
-        '''Kg cost of debt'''
-        ''' Bd = Bg = DebtBeta '''
-        
-        return self.Rfm + self.Bd * (self.rM - self.Rfm)
+        '''Kg: cost of debt'''
+        ''' 
+            Bd = Bg = DebtBeta
+        or
+            Kg = Interest Expenses * (1 - Tax Rate)
+        '''
+        '''
+            - Selskapsskatt (Sb) = 0,25
+            - Kreditorskatt (Sk) = 0,25
+            - Investorskatt (SEd) = 0,11
+            - Investorskatt (SEd) = 0,3168 regner med det er det samme som aksjegevinst skatt 
+        '''
+        return self.Rfm + (self.Bd * (self.ErM - self.Rfm))
         #return self.Rfm + Beta(self.TARGET).Bd * (self.rM - self.Rfm) #Alternative
+
+    @property
+    def rU(self,):
+        ''' cost of company without debt'''
+        # print(self.Rfm)
+        # print(self.ErM )
+        # print(self.Bu)
+
+        # print((self.ErM  - self.Rfm))
+        # print("==========================")
+        return self.Rfm * self.Bu * (self.ErM  - self.Rfm)
 
     @property
     def wacc(self, ):
@@ -135,24 +155,49 @@ class EnterpriceValue(CapitalCost, Enterprice):
     def Vm(self, ):
         ''' Value of TARGET '''
         '''
-            Vu + Vx 
+            Vm = Vu + Vx 
             or
-            E(FKS) / ((1+Kwacc)**t)
+            Vm =E(FKS) / ((1+Kwacc)**t)
+            or 
+            Vm = Vu + PG * N*           [nb: N* = N-stjere]
         '''
-        return 
+        return self.Vu + (self.PG * self.N_star)
     
     @property
     def Vu(self, ):
         ''' Value of TARGET '''
         ''' 
             Vu = SUM : E(FKS) / ((1+Ku)**t)
-            
+            or
+            (E(OFRS)*(1-Sb)) / Ku      ofrs = ebit
         '''
-        return
+        ebit = TARGET.income_statement['ebit']
+        #return last_fks /((1+self.rU))
+        # print(self.rU)
+        # print(self.tax, " ", 1-self.tax)
+        # print(ebit)
+        # print("_________________________")
+        #return (ebit*(1-self.tax)) / self.rU
+        fks = TARGET.cash_flow['fks']
+        return (fks ) / ((1+self.rU)) 
 
     @property
-    def Kx(self, ):
-        ''' verdien av Renteskattegevinst '''
+    def N_star(self,) -> float:
+        ''' 
+            represents N*, and means "the tax value factor"/"skatteverdifaktoren"
+            formula: N* =  1-(1-Sb)*(1-Se)] / (1-Sk) 
+            Sb = bedriftskatt? aka vanlig fra regnskapet 
+            Se = eierskatt / investorskatt
+            Sk = kreditorskatt
+        '''
+        Sb = self.tax
+        Se = self.investor_tax
+        Sk = self.tax
+        return (1-(1-Sb)*(1-Se)) / (1-Sk) 
+    
+    @property
+    def rX(self, ):
+        ''' Kx cost of Renteskattegevinst '''
         '''
             Vx = SUM : E(s*Rt) / (1+Kx)
         '''
@@ -161,6 +206,8 @@ class EnterpriceValue(CapitalCost, Enterprice):
         = (r * PG * s)/r  = PG*s
         
         '''
+        
+        #print(TARGET.cash_flow)
         return
 
     def check_arbitrage_opportunity(self):
@@ -239,7 +286,10 @@ def main():
     country = "Norway"
     r = Rates(country)
     E = EnterpriceValue()# r, beta)
-    print(E.Kx)
+    print(E.Vu)
+    print(E.Vm)
+
+    ##### NOTE NOT CORRECT
     
 
 

@@ -90,6 +90,7 @@ class Enterprice:
             'totalDebt' : float(stat['totalDebt']),
             'totalRevenue' : float(stat['totalRevenue']),
             'country' : stat['country'],
+            'fks': stat['freeCashflow'],
         }
     @property
     def balance (self, ):
@@ -111,12 +112,19 @@ class Enterprice:
 
     @property
     def income_statement (self, ):
-        pass
+        #orint(self.company.income_stmt)
         return {
             'interest_expence' : float(self.company.income_stmt.loc['Interest Expense'][0]),
+            'ebit' : float(self.company.income_stmt.loc['EBIT'][0]),
         }
 
 
+    @property
+    def cash_flow (self, ):
+        #return self.company.cashflow
+        return {
+            'fks' : float(self.company.cashflow.loc['Free Cash Flow'][0]),
+        }
 
     def iniate_all_properties(self):
         self.company = yf.Ticker(self.ticker)

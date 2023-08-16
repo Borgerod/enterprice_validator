@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+import re
 
 class Rates:
     '''
@@ -10,9 +11,28 @@ class Rates:
 
     @property
     def tax(self,):
-        #should be replaced with a getter
-        return 0.25
+        url = f"https://www.skatteetaten.no/satser/faktor-for-oppjustering-av-gevinsttap-eller-utbytte-pa-aksjer/"
+        url = f"https://www.regjeringen.no/no/tema/okonomi-og-budsjett/skatter-og-avgifter/skattesatser-2023/id2929581/"
+        soup = BeautifulSoup(requests.get(url).text, "html.parser")
+        return (float(re.sub(r'[^\x00-\x7F]+',' ', soup.find_all('tr')[3].find_all('td')[1].find('p').text).replace(" pst.","")))/100
     
+    @property
+    def investor_tax(self,):
+        ''' Merk at det er mulig at utbytte må oppjusteres før skatteberegning'''
+        return self.tax * self.investor_tax_adjustment_rate
+    
+    @property
+    def investor_tax(self,):
+        ''' apparently creditors tax are = to company tax (which do make sence since creditors are companies too)'''
+        return self.tax
+    
+
+    @property
+    def investor_tax_adjustment_rate(self,):
+        url = f"https://www.skatteetaten.no/satser/faktor-for-oppjustering-av-gevinsttap-eller-utbytte-pa-aksjer/"
+        soup = BeautifulSoup(requests.get(url).text, "html.parser")
+        return  float(soup.select("h2")[0].find_next("p").text.split(" ")[-1].strip(".").replace(",","."))
+
     @property
     def government_bond_rate(self):
         url = f"http://www.worldgovernmentbonds.com/bond-historical-data/{self.country}/10-years/"

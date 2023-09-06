@@ -1,7 +1,5 @@
-# enterprice_validator
+# enterprice_validator (Work in progress)
 
-
-## Work in progress
 
 ## Vision for project: 
 The software will take a company name as input, then it will firstly find key compeditors in the relevant market.
